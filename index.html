@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,10 +9,10 @@
     :root {
       /* Light theme (screen + print-friendly) */
       --bg: #f6f7fb;
-      --panel: rgba(0,0,0,0.03);
-      --panel-border: rgba(0,0,0,0.12);
+      --panel: rgba(0, 0, 0, 0.03);
+      --panel-border: rgba(0, 0, 0, 0.12);
       --text: #121826;
-      --muted: rgba(18,24,38,0.68);
+      --muted: rgba(18, 24, 38, 0.68);
       --accent: #2b5cff;
 
       /* Defaults */
@@ -26,7 +27,9 @@
       --shadow: 215 90% 45%;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -50,7 +53,9 @@
     }
 
     @media (max-width: 920px) {
-      .wrap { grid-template-columns: 1fr; }
+      .wrap {
+        grid-template-columns: 1fr;
+      }
     }
 
     .stage-board {
@@ -68,11 +73,20 @@
       height: 100%;
     }
 
-    .stage-row.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .stage-row.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .stage-row.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stage-row.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 
     @media (max-width: 920px) {
-      .stage-row.two, .stage-row.four { grid-template-columns: 1fr; }
+
+      .stage-row.two,
+      .stage-row.four {
+        grid-template-columns: 1fr;
+      }
     }
 
     .stage {
@@ -80,10 +94,11 @@
       border-radius: 22px;
       border: 1px solid var(--panel-border);
       background: #ffffff;
-      box-shadow: 0 10px 30px rgba(18,24,38,0.10);
+      box-shadow: 0 10px 30px rgba(18, 24, 38, 0.10);
 
       /* Reserve space for top-left vector overlay (5% less height) */
-      padding: 53px 53px 53px 160px; /* was 56px 56px 56px 168px */
+      padding: 53px 53px 53px 160px;
+      /* was 56px 56px 56px 168px */
       overflow: hidden;
       min-height: 100%;
 
@@ -93,7 +108,9 @@
       justify-content: center;
     }
 
-    .stage.selected { outline: 2px solid var(--accent); }
+    .stage.selected {
+      outline: 2px solid var(--accent);
+    }
 
     .stage::before {
       display: none;
@@ -111,9 +128,9 @@
       justify-items: start;
       padding: 8px;
       border-radius: 14px;
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(0,0,0,0.10);
-      box-shadow: 0 8px 20px rgba(18,24,38,0.08);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      box-shadow: 0 8px 20px rgba(18, 24, 38, 0.08);
       pointer-events: none;
       user-select: none;
     }
@@ -125,8 +142,8 @@
       padding: 24px;
       gap: 18px;
       border-radius: 24px;
-      background: rgba(255,255,255,0.92);
-      box-shadow: 0 24px 80px rgba(18,24,38,0.22);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 24px 80px rgba(18, 24, 38, 0.22);
     }
 
     .stage.is-focused .stage-vector .dial,
@@ -171,7 +188,7 @@
 
     .stage-vector-mini-title {
       font-size: 10px;
-      color: rgba(18,24,38,0.70);
+      color: rgba(18, 24, 38, 0.70);
       letter-spacing: 0.02em;
     }
 
@@ -179,7 +196,7 @@
       width: 100%;
       height: 14px;
       margin: 0;
-      accent-color: rgba(18,24,38,0.55);
+      accent-color: rgba(18, 24, 38, 0.55);
     }
 
     .stage-vector-mini input[type="range"][disabled] {
@@ -190,11 +207,11 @@
     .stage-vector-label {
       font-variant-numeric: tabular-nums;
       font-size: 11px;
-      color: rgba(18,24,38,0.86);
+      color: rgba(18, 24, 38, 0.86);
       padding: 2px 6px;
       border-radius: 999px;
-      background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       line-height: 1.2;
       white-space: nowrap;
     }
@@ -249,12 +266,13 @@
     }
 
     .panel {
-      display: none; /* control view removed (kept in DOM for wiring) */
+      display: none;
+      /* control view removed (kept in DOM for wiring) */
       border-radius: 22px;
       border-radius: 22px;
       border: 1px solid var(--panel-border);
-      background: rgba(255,255,255,0.78);
-      box-shadow: 0 10px 30px rgba(18,24,38,0.10);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 10px 30px rgba(18, 24, 38, 0.10);
       padding: 24px;
       overflow: hidden;
     }
@@ -280,8 +298,8 @@
       align-items: center;
       padding: 10px 10px;
       border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      background: rgba(255, 255, 255, 0.72);
       margin-bottom: 10px;
     }
 
@@ -307,24 +325,24 @@
 
     .dial .ring {
       fill: none;
-      stroke: rgba(0,0,0,0.22);
+      stroke: rgba(0, 0, 0, 0.22);
       stroke-width: 1.4;
     }
 
     .dial .grid {
       fill: none;
-      stroke: rgba(0,0,0,0.12);
+      stroke: rgba(0, 0, 0, 0.12);
       stroke-width: 1;
     }
 
     .dial .needle {
-      stroke: rgba(0,0,0,0.70);
+      stroke: rgba(0, 0, 0, 0.70);
       stroke-width: 2.2;
       stroke-linecap: round;
     }
 
     .dial .dot {
-      fill: rgba(0,0,0,0.70);
+      fill: rgba(0, 0, 0, 0.70);
     }
 
     .value {
@@ -334,8 +352,8 @@
       opacity: 0.9;
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.10);
     }
 
     input[type="range"] {
@@ -343,19 +361,22 @@
       accent-color: var(--accent);
     }
 
-    input[type="text"], textarea {
+    input[type="text"],
+    textarea {
       width: 100%;
       padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.14);
-      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      background: rgba(255, 255, 255, 0.92);
       color: var(--text);
       outline: none;
       font: inherit;
       resize: vertical;
     }
 
-    textarea { min-height: 84px; }
+    textarea {
+      min-height: 84px;
+    }
 
     .btnbar {
       display: flex;
@@ -366,8 +387,8 @@
 
     button {
       appearance: none;
-      border: 1px solid rgba(0,0,0,0.14);
-      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      background: rgba(255, 255, 255, 0.85);
       color: var(--text);
       padding: 9px 12px;
       border-radius: 999px;
@@ -376,15 +397,20 @@
       font-size: 12px;
     }
 
-    button:hover { border-color: rgba(0,0,0,0.22); }
-    button:active { transform: translateY(1px); }
+    button:hover {
+      border-color: rgba(0, 0, 0, 0.22);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
 
     .kbd {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 11px;
-      color: rgba(18,24,38,0.85);
-      background: rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.10);
+      color: rgba(18, 24, 38, 0.85);
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.10);
       padding: 2px 6px;
       border-radius: 6px;
     }
@@ -399,7 +425,7 @@
     @media print {
       :root {
         --bg: #ffffff;
-        --panel-border: rgba(0,0,0,0.20);
+        --panel-border: rgba(0, 0, 0, 0.20);
         --accent: #000000;
       }
 
@@ -417,21 +443,29 @@
       }
 
       /* Hide controls entirely when printing */
-      .panel { display: none !important; }
+      .panel {
+        display: none !important;
+      }
 
       .stage {
         box-shadow: none !important;
-        border: 1px solid rgba(0,0,0,0.20);
-        min-height: 342px; /* was 360px */
-        padding: 23px;     /* was 24px */
+        border: 1px solid rgba(0, 0, 0, 0.20);
+        min-height: 342px;
+        /* was 360px */
+        padding: 23px;
+        /* was 24px */
       }
 
-      .stage::before { opacity: 0.35; }
+      .stage::before {
+        opacity: 0.35;
+      }
     }
 
     /* Motion safety */
     @media (prefers-reduced-motion: reduce) {
-      * { scroll-behavior: auto !important; }
+      * {
+        scroll-behavior: auto !important;
+      }
     }
 
     /* Focus (modal) view */
@@ -443,12 +477,14 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: rgba(18,24,38,0.22);
+      background: rgba(18, 24, 38, 0.22);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
-    .focus-overlay.open { display: flex; }
+    .focus-overlay.open {
+      display: flex;
+    }
 
     .focus-card {
       position: relative;
@@ -462,14 +498,14 @@
       padding: 18px;
       border-radius: 22px;
       border: 2px solid var(--accent);
-      background: rgba(255,255,255,0.96);
-      box-shadow: 0 24px 80px rgba(18,24,38,0.22);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 24px 80px rgba(18, 24, 38, 0.22);
     }
 
     .focus-controls {
       border-radius: 18px;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      background: rgba(255, 255, 255, 0.88);
       padding: 14px;
       overflow: auto;
     }
@@ -484,8 +520,8 @@
       padding: 14px;
       gap: 14px;
       border-radius: 18px;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(0, 0, 0, 0.10);
       box-shadow: none;
       pointer-events: auto;
       user-select: none;
@@ -522,8 +558,8 @@
 
     .focus-view {
       border-radius: 18px;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      background: rgba(255, 255, 255, 0.78);
       overflow: hidden;
       display: flex;
       align-items: stretch;
@@ -538,9 +574,9 @@
       width: 38px;
       height: 38px;
       border-radius: 999px;
-      border: 1px solid rgba(0,0,0,0.14);
-      background: rgba(255,255,255,0.92);
-      color: rgba(18,24,38,0.9);
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      background: rgba(255, 255, 255, 0.92);
+      color: rgba(18, 24, 38, 0.9);
       font-weight: 800;
       line-height: 1;
       display: grid;
@@ -548,20 +584,24 @@
       cursor: pointer;
     }
 
-    .focus-close:hover { border-color: rgba(0,0,0,0.22); }
+    .focus-close:hover {
+      border-color: rgba(0, 0, 0, 0.22);
+    }
 
     /* When a stage is focused, let it fill the right pane */
     .stage.is-focused {
       width: 100%;
       height: 100%;
       min-height: 100%;
-      box-shadow: 0 18px 60px rgba(18,24,38,0.20);
+      box-shadow: 0 18px 60px rgba(18, 24, 38, 0.20);
       padding: 56px;
       overflow: hidden;
     }
 
     /* In focused view, move vector UI into left column */
-    .stage.is-focused .stage-vector { display: none; }
+    .stage.is-focused .stage-vector {
+      display: none;
+    }
 
     /* In focus, remove left reserve so the content can truly center */
     .stage.is-focused {
@@ -582,10 +622,10 @@
       bottom: 0;
       z-index: 9000;
       padding: 12px 16px;
-      background: rgba(246,247,251,0.85);
+      background: rgba(246, 247, 251, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(0,0,0,0.10);
+      border-top: 1px solid rgba(0, 0, 0, 0.10);
     }
 
     .footerbar-inner {
@@ -597,52 +637,173 @@
       align-items: center;
     }
 
-    .footerbar-inner > button {
+    .footerbar-inner>button {
       width: 100%;
     }
 
     /* Give content room above fixed footer */
-    body { padding-bottom: 76px; }
+    body {
+      padding-bottom: 76px;
+    }
 
     @media print {
-      .footerbar { display: none !important; }
-      body { padding-bottom: 0 !important; }
+      .footerbar {
+        display: none !important;
+      }
+
+      body {
+        padding-bottom: 0 !important;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <section class="stage-board" aria-label="Preview stage">
       <div class="stage-row two" aria-label="Top row (2 previews)">
-        <div class="stage selected" data-index="0"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">both, withou</div></div></div></div></div>
-        <div class="stage" data-index="1"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">both, with</div></div></div></div></div>
+        <div class="stage selected" data-index="0">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">both, without</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="1">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">both, with</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="stage-row four" aria-label="Middle row (4 previews)">
-        <div class="stage" data-index="2"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">left</div></div></div></div></div>
-        <div class="stage" data-index="3"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">right</div></div></div></div></div>
-        <div class="stage" data-index="4"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">left</div></div></div></div></div>
-        <div class="stage" data-index="5"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">right</div></div></div></div></div>
+        <div class="stage" data-index="2">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">left</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="3">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">right</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="4">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">left</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="5">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">right</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="stage-row four" aria-label="Bottom row (4 previews)">
-        <div class="stage" data-index="6"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
-        <div class="stage" data-index="7"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
-        <div class="stage" data-index="8"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
-        <div class="stage" data-index="9"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
+        <div class="stage" data-index="6">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">○</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="7">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">○</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="8">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">○</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="9">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">○</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="stage-row four" aria-label="Fourth row (4 previews)">
-        <div class="stage" data-index="10"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
-        <div class="stage" data-index="11"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
-        <div class="stage" data-index="12"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
-        <div class="stage" data-index="13"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
+        <div class="stage" data-index="10">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">────</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="11">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">────</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="12">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">────</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" data-index="13">
+          <div class="content">
+            <div class="text-area">
+              <div class="text-stack">
+                <div class="main-text">────</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <aside class="panel" aria-label="Controls">
       <h1>Controls</h1>
-      <p>Bloom is generated directly from the text via <span class="kbd">text-shadow</span> (more direct). Offset is computed from direction + distance.</p>
+      <p>Bloom is generated directly from the text via <span class="kbd">text-shadow</span> (more direct). Offset is
+        computed from direction + distance.</p>
 
       <div class="row">
         <label>
@@ -720,7 +881,8 @@
       <!-- actions moved to bottom bar -->
 
       <div class="hint">
-        Tip: Use <span class="kbd">Shift</span> + mouse wheel over sliders for finer control (supported in some browsers).
+        Tip: Use <span class="kbd">Shift</span> + mouse wheel over sliders for finer control (supported in some
+        browsers).
       </div>
     </aside>
   </div>
@@ -759,7 +921,7 @@
       op: 55,
       blurOn: 1
     };
-    
+
     const textInput = $("textInput");
     const size = $("size");
     const dir = $("dir");
@@ -1013,7 +1175,7 @@
             deg = (deg % 360 + 360) % 360;
 
             // distance mapped to slider max
-            const r = Math.sqrt(dx*dx + dy*dy);
+            const r = Math.sqrt(dx * dx + dy * dy);
             const rMin = 6;
             const rMax = 24;
             const t = clamp((r - rMin) / (rMax - rMin), 0, 1);
@@ -1354,17 +1516,33 @@
       render();
     });
 
-    // Mouse wheel on selected stage: toggle shadows for that stage only
-    document.addEventListener('wheel', (e) => {
-      if (!activeStage) return;
-      // avoid interfering with sliders / scrolling panel
-      if (e.target.closest('.panel')) return;
-      e.preventDefault();
-      const current = Number(activeStage.dataset.blurOn ?? DEFAULTS.blurOn) !== 0;
-      activeStage.dataset.blurOn = current ? '0' : '1';
-      activeStage.style.setProperty('--blurOn', current ? '0' : '1');
+
+    // Click / touch in maximized (focused) view: toggle shadows for the selected stage only
+    function toggleStageShadow(stage) {
+      if (!stage) return;
+      const current = Number(stage.dataset.blurOn ?? DEFAULTS.blurOn) !== 0;
+      stage.dataset.blurOn = current ? '0' : '1';
+      stage.style.setProperty('--blurOn', current ? '0' : '1');
       updateBlurButton();
-    }, { passive: false });
+    }
+
+    // Use pointer events so it works with mouse + touch
+    if (focusView) {
+      focusView.addEventListener('pointerdown', (e) => {
+        const stage = focusView.querySelector('.stage.is-focused');
+        if (!stage) return;
+        if (stage !== activeStage) return;
+
+        // Only primary mouse button / touch
+        if (e.button !== undefined && e.button !== 0) return;
+
+        // Don't toggle when interacting with controls
+        if (e.target.closest('.stage-vector')) return;
+        if (e.target.closest('input, button, textarea, select, label')) return;
+
+        toggleStageShadow(stage);
+      });
+    }
 
     // Focus overlay interactions
     if (focusOverlay && focusCard) {
@@ -1403,16 +1581,61 @@
       });
     });
 
+    // Load preset JSON via URL parameter, e.g. ?preset=test.json
+    async function loadPresetFromUrl() {
+      const qs = new URLSearchParams(window.location.search);
+      const preset = qs.get('preset');
+      if (!preset) return false;
+
+      // Allow relative (to current page) or absolute URLs
+      const url = new URL(preset, window.location.href).toString();
+
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status} while fetching ${url}`);
+        const data = await res.json();
+
+        // Accept either full save format {version, selectedIndex, stages:[...]}
+        // or a single-stage object (applied to selected stage)
+        const stagesEls = Array.from(document.querySelectorAll('.stage'));
+
+        if (Array.isArray(data?.stages)) {
+          const stagesData = data.stages;
+          stagesEls.forEach((stage, i) => applyStateToStage(stage, stagesData[i] ?? DEFAULTS));
+
+          const idx = clamp(Number(data?.selectedIndex ?? 0), 0, stagesEls.length - 1);
+          stagesEls.forEach(s => s.classList.remove('selected'));
+          stagesEls[idx].classList.add('selected');
+          activeStage = stagesEls[idx];
+        } else if (data && typeof data === 'object') {
+          // Apply single preset object to the currently selected stage
+          activeStage = document.querySelector('.stage.selected') ?? document.querySelector('.stage');
+          if (activeStage) applyStateToStage(activeStage, data);
+        }
+
+        return true;
+      } catch (e) {
+        console.warn('Preset load failed:', e);
+        alert('Could not load preset from URL: ' + (e?.message ?? String(e)));
+        return false;
+      }
+    }
+
     // Initialize defaults for all stages
     document.querySelectorAll('.stage').forEach(stage => initStage(stage));
 
-    // Ensure controls reflect the initially selected stage
-    activeStage = document.querySelector('.stage.selected') ?? document.querySelector('.stage');
-    if (activeStage) {
-      applyStageStateToControls(activeStage);
-      // And ensure the selected stage matches its own saved settings
-      render();
-    }
+    // Boot sequence: apply URL preset first (if present), then sync UI
+    (async () => {
+      await loadPresetFromUrl();
+
+      // Ensure controls reflect the selected stage
+      activeStage = document.querySelector('.stage.selected') ?? document.querySelector('.stage');
+      if (activeStage) {
+        applyStageStateToControls(activeStage);
+        render();
+      }
+    })();
   </script>
 </body>
+
 </html>
