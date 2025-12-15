@@ -1,4 +1,4 @@
-# Keratoconus test
+# Keratoconus tester
 
 A single-file, browser-based visual check inspired by keratoconus “ghosting/double vision” symptoms. It renders multiple preview panels using bold text and bloom-like shadows (via CSS `text-shadow`) to make subtle duplication/blur effects easier to notice.
 
@@ -33,4 +33,5 @@ All final design decisions, testing, and responsibility for the code remain with
 
 ## License
 MIT License
+
 
