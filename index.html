@@ -4,16 +4,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Text Shadow Bloom Playground</title>
+  <title>keratoconus-tester</title>
   <style>
     :root {
-      /* Light theme (screen + print-friendly) */
-      --bg: #f6f7fb;
-      --panel: rgba(0, 0, 0, 0.03);
-      --panel-border: rgba(0, 0, 0, 0.12);
-      --text: #121826;
-      --muted: rgba(18, 24, 38, 0.68);
-      --accent: #2b5cff;
+      /* Black theme only */
+      --bg: #0b0b0f;
+      --panel: rgba(255, 255, 255, 0.04);
+      --panel-2: rgba(255, 255, 255, 0.06);
+      --panel-3: rgba(255, 255, 255, 0.08);
+      --panel-border: rgba(255, 255, 255, 0.16);
+      --text: #f5f7ff;
+      --muted: rgba(245, 247, 255, 0.65);
+      --accent: #8aa2ff;
 
       /* Defaults */
       --size: 64px;
@@ -23,8 +25,16 @@
       --shadowAlpha: 0.55;
       --blurOn: 1;
 
-      /* Shadow color (edit here if you want a different tint) */
-      --shadow: 215 90% 45%;
+      /* Shadow color */
+      --shadow: 215 90% 55%;
+
+      /* Vector UI (light-themed controls) */
+      --vec-bg: rgba(255, 255, 255, 0.92);
+      --vec-bg-soft: rgba(255, 255, 255, 0.85);
+      --vec-border: rgba(0, 0, 0, 0.14);
+      --vec-text: #121826;
+      --vec-muted: rgba(18, 24, 38, 0.68);
+      --vec-shadow: rgba(0, 0, 0, 0.18);
     }
 
     * {
@@ -40,6 +50,12 @@
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       line-height: 1.35;
+
+      /* always show a vertical scrollbar (layout stability) */
+      overflow-y: scroll;
+
+      /* keep content above fixed footer */
+      padding-bottom: 76px;
     }
 
     .wrap {
@@ -62,9 +78,9 @@
       display: grid;
       grid-template-rows: 1fr 1fr 1fr 1fr;
       gap: 16px;
-      height: 100%;
-      gap: 16px;
-      height: 100%;
+
+      /* +20% height in main (overview) view */
+      height: 115%;
     }
 
     .stage-row {
@@ -93,19 +109,22 @@
       position: relative;
       border-radius: 22px;
       border: 1px solid var(--panel-border);
-      background: #ffffff;
-      box-shadow: 0 10px 30px rgba(18, 24, 38, 0.10);
+      background: var(--panel);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
 
-      /* Reserve space for top-left vector overlay (5% less height) */
+      /* Reserve space for top-left vector overlay */
       padding: 53px 53px 53px 160px;
-      /* was 56px 56px 56px 168px */
       overflow: hidden;
       min-height: 100%;
 
-      /* Robust centering (avoids grid/padding edge-cases) */
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    /* Overview (grid) always shows shadow, regardless of stored toggle state */
+    .stage:not(.is-focused) {
+      --blurOn: 1;
     }
 
     .stage.selected {
@@ -128,9 +147,53 @@
       justify-items: start;
       padding: 8px;
       border-radius: 14px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(0, 0, 0, 0.10);
-      box-shadow: 0 8px 20px rgba(18, 24, 38, 0.08);
+      background: var(--vec-bg-soft);
+      border: 1px solid var(--vec-border);
+      box-shadow: 0 8px 20px var(--vec-shadow);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+
+    /* Reserve space for top-left vector overlay */
+    padding: 53px 53px 53px 160px;
+    overflow: hidden;
+    min-height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    /* Overview (grid) always shows shadow, regardless of stored toggle state */
+    .stage:not(.is-focused) {
+      --blurOn: 1;
+    }
+
+    .stage.selected {
+      outline: 2px solid var(--accent);
+    }
+
+    .stage::before {
+      display: none;
+    }
+
+    .stage-vector {
+      width: 96px;
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 3;
+      display: grid;
+      gap: 6px;
+      align-items: start;
+      justify-items: start;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
       pointer-events: none;
       user-select: none;
     }
@@ -142,8 +205,8 @@
       padding: 24px;
       gap: 18px;
       border-radius: 24px;
-      background: rgba(255, 255, 255, 0.92);
-      box-shadow: 0 24px 80px rgba(18, 24, 38, 0.22);
+      background: var(--vec-bg);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
     }
 
     .stage.is-focused .stage-vector .dial,
@@ -166,8 +229,38 @@
     }
 
     .stage.is-focused .stage-vector-label {
-      font-size: 14px;
-      padding: 6px 12px;
+      font-variant-numeric: tabular-nums;
+      font-size: 11px;
+      color: var(--vec-text);
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    /* Overview vector UI: force light text on dark app background */
+    .stage:not(.is-focused) .stage-vector-label {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--panel-border);
+    }
+
+    .stage:not(.is-focused) .stage-vector-mini-title {
+      color: var(--text);
+    }
+
+    .stage:not(.is-focused) .stage-vector .needle {
+      stroke: var(--text);
+    }
+
+    .stage:not(.is-focused) .stage-vector .dot {
+      fill: var(--text);
+    }
+
+    .stage-vector-mini input[type="range"] {
+      accent-color: var(--accent);
     }
 
     .stage-vector .dial {
@@ -188,7 +281,7 @@
 
     .stage-vector-mini-title {
       font-size: 10px;
-      color: rgba(18, 24, 38, 0.70);
+      color: var(--muted);
       letter-spacing: 0.02em;
     }
 
@@ -196,7 +289,7 @@
       width: 100%;
       height: 14px;
       margin: 0;
-      accent-color: rgba(18, 24, 38, 0.55);
+      accent-color: rgba(0, 0, 0, 0.55);
     }
 
     .stage-vector-mini input[type="range"][disabled] {
@@ -207,10 +300,10 @@
     .stage-vector-label {
       font-variant-numeric: tabular-nums;
       font-size: 11px;
-      color: rgba(18, 24, 38, 0.86);
+      color: var(--text);
       padding: 2px 6px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.04);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(0, 0, 0, 0.08);
       line-height: 1.2;
       white-space: nowrap;
@@ -272,7 +365,7 @@
       border-radius: 22px;
       border: 1px solid var(--panel-border);
       background: rgba(255, 255, 255, 0.78);
-      box-shadow: 0 10px 30px rgba(18, 24, 38, 0.10);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
       padding: 24px;
       overflow: hidden;
     }
@@ -298,7 +391,7 @@
       align-items: center;
       padding: 10px 10px;
       border-radius: 14px;
-      border: 1px solid rgba(0, 0, 0, 0.10);
+      border: 1px solid var(--panel-border);
       background: rgba(255, 255, 255, 0.72);
       margin-bottom: 10px;
     }
@@ -325,24 +418,24 @@
 
     .dial .ring {
       fill: none;
-      stroke: rgba(0, 0, 0, 0.22);
+      stroke: rgba(255, 255, 255, 0.22);
       stroke-width: 1.4;
     }
 
     .dial .grid {
       fill: none;
-      stroke: rgba(0, 0, 0, 0.12);
+      stroke: rgba(255, 255, 255, 0.14);
       stroke-width: 1;
     }
 
     .dial .needle {
-      stroke: rgba(0, 0, 0, 0.70);
+      stroke: var(--text);
       stroke-width: 2.2;
       stroke-linecap: round;
     }
 
     .dial .dot {
-      fill: rgba(0, 0, 0, 0.70);
+      fill: var(--text);
     }
 
     .value {
@@ -352,8 +445,8 @@
       opacity: 0.9;
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(0, 0, 0, 0.10);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--panel-border);
     }
 
     input[type="range"] {
@@ -387,8 +480,8 @@
 
     button {
       appearance: none;
-      border: 1px solid rgba(0, 0, 0, 0.14);
-      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text);
       padding: 9px 12px;
       border-radius: 999px;
@@ -398,7 +491,8 @@
     }
 
     button:hover {
-      border-color: rgba(0, 0, 0, 0.22);
+      border-color: rgba(255, 255, 255, 0.32);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     button:active {
@@ -408,9 +502,9 @@
     .kbd {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 11px;
-      color: rgba(18, 24, 38, 0.85);
-      background: rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(0, 0, 0, 0.10);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--panel-border);
       padding: 2px 6px;
       border-radius: 6px;
     }
@@ -477,9 +571,9 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: rgba(18, 24, 38, 0.22);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
     .focus-overlay.open {
@@ -497,20 +591,20 @@
       justify-items: stretch;
       padding: 18px;
       border-radius: 22px;
-      border: 2px solid var(--accent);
-      background: rgba(255, 255, 255, 0.96);
-      box-shadow: 0 24px 80px rgba(18, 24, 38, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: #0b0b0f;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
     }
 
     .focus-controls {
       border-radius: 18px;
-      border: 1px solid rgba(0, 0, 0, 0.10);
-      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
       padding: 14px;
       overflow: auto;
     }
 
-    /* Focus left panel: scale the stage-vector UI to fill the frame */
+    /* Focus left panel: make vector controls DARK themed in maximized view */
     .focus-controls .stage-vector {
       position: relative;
       top: auto;
@@ -519,12 +613,13 @@
       max-width: 100%;
       padding: 14px;
       gap: 14px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(0, 0, 0, 0.10);
+      border-radius: 0;
+      background: none;
+      border: none;
       box-shadow: none;
       pointer-events: auto;
       user-select: none;
+      touch-action: none;
     }
 
     .focus-controls .stage-vector .dial {
@@ -538,6 +633,7 @@
       height: 100%;
     }
 
+
     .focus-controls .stage-vector-mini {
       width: 100%;
       gap: 8px;
@@ -545,21 +641,26 @@
 
     .focus-controls .stage-vector-mini-title {
       font-size: 13px;
+      color: var(--muted);
     }
 
     .focus-controls .stage-vector-mini input[type="range"] {
       height: 18px;
+      accent-color: var(--accent);
     }
 
     .focus-controls .stage-vector-label {
       font-size: 13px;
       padding: 6px 10px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.16);
     }
 
     .focus-view {
       border-radius: 18px;
-      border: 1px solid rgba(0, 0, 0, 0.10);
-      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.04);
       overflow: hidden;
       display: flex;
       align-items: stretch;
@@ -574,9 +675,9 @@
       width: 38px;
       height: 38px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 0, 0, 0.14);
-      background: rgba(255, 255, 255, 0.92);
-      color: rgba(18, 24, 38, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
       font-weight: 800;
       line-height: 1;
       display: grid;
@@ -593,7 +694,7 @@
       width: 100%;
       height: 100%;
       min-height: 100%;
-      box-shadow: 0 18px 60px rgba(18, 24, 38, 0.20);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.20);
       padding: 56px;
       overflow: hidden;
     }
@@ -622,7 +723,7 @@
       bottom: 0;
       z-index: 9000;
       padding: 12px 16px;
-      background: rgba(246, 247, 251, 0.85);
+      background: rgba(11, 11, 15, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid rgba(0, 0, 0, 0.10);
@@ -666,7 +767,7 @@
           <div class="content">
             <div class="text-area">
               <div class="text-stack">
-                <div class="main-text">both, without</div>
+                <div class="main-text">both, withou</div>
               </div>
             </div>
           </div>
@@ -877,8 +978,6 @@
         </label>
         <span class="value">all</span>
       </div>
-
-      <!-- actions moved to bottom bar -->
 
       <div class="hint">
         Tip: Use <span class="kbd">Shift</span> + mouse wheel over sliders for finer control (supported in some
@@ -1515,7 +1614,6 @@
       dir.value = 180; // down
       render();
     });
-
 
     // Click / touch in maximized (focused) view: toggle shadows for the selected stage only
     function toggleStageShadow(stage) {
