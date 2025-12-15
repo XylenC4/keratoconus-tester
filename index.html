@@ -1,0 +1,1418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text Shadow Bloom Playground</title>
+  <style>
+    :root {
+      /* Light theme (screen + print-friendly) */
+      --bg: #f6f7fb;
+      --panel: rgba(0,0,0,0.03);
+      --panel-border: rgba(0,0,0,0.12);
+      --text: #121826;
+      --muted: rgba(18,24,38,0.68);
+      --accent: #2b5cff;
+
+      /* Defaults */
+      --size: 64px;
+      --dir: 45deg;
+      --dist: 18px;
+      --bloom: 28px;
+      --shadowAlpha: 0.55;
+      --blurOn: 1;
+
+      /* Shadow color (edit here if you want a different tint) */
+      --shadow: 215 90% 45%;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.35;
+    }
+
+    .wrap {
+      width: min(1800px, 98vw);
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      align-items: stretch;
+      min-height: calc(100vh - 40px);
+    }
+
+    @media (max-width: 920px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+
+    .stage-board {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+      gap: 16px;
+      height: 100%;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .stage-row {
+      display: grid;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .stage-row.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stage-row.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    @media (max-width: 920px) {
+      .stage-row.two, .stage-row.four { grid-template-columns: 1fr; }
+    }
+
+    .stage {
+      position: relative;
+      border-radius: 22px;
+      border: 1px solid var(--panel-border);
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(18,24,38,0.10);
+
+      /* Reserve space for top-left vector overlay (5% less height) */
+      padding: 53px 53px 53px 160px; /* was 56px 56px 56px 168px */
+      overflow: hidden;
+      min-height: 100%;
+
+      /* Robust centering (avoids grid/padding edge-cases) */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stage.selected { outline: 2px solid var(--accent); }
+
+    .stage::before {
+      display: none;
+    }
+
+    .stage-vector {
+      width: 96px;
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 3;
+      display: grid;
+      gap: 6px;
+      align-items: start;
+      justify-items: start;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 8px 20px rgba(18,24,38,0.08);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Interactive + larger in maximized view (200%) */
+    .stage.is-focused .stage-vector {
+      pointer-events: auto;
+      width: 320px;
+      padding: 24px;
+      gap: 18px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 24px 80px rgba(18,24,38,0.22);
+    }
+
+    .stage.is-focused .stage-vector .dial,
+    .stage.is-focused .stage-vector .dial svg {
+      width: 264px;
+      height: 264px;
+    }
+
+    .stage.is-focused .stage-vector-mini {
+      width: 264px;
+      gap: 10px;
+    }
+
+    .stage.is-focused .stage-vector-mini-title {
+      font-size: 14px;
+    }
+
+    .stage.is-focused .stage-vector-mini input[type="range"] {
+      height: 22px;
+    }
+
+    .stage.is-focused .stage-vector-label {
+      font-size: 14px;
+      padding: 6px 12px;
+    }
+
+    .stage-vector .dial {
+      width: 80px;
+      height: 80px;
+    }
+
+    .stage-vector .dial svg {
+      width: 80px;
+      height: 80px;
+    }
+
+    .stage-vector-mini {
+      width: 80px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .stage-vector-mini-title {
+      font-size: 10px;
+      color: rgba(18,24,38,0.70);
+      letter-spacing: 0.02em;
+    }
+
+    .stage-vector-mini input[type="range"] {
+      width: 100%;
+      height: 14px;
+      margin: 0;
+      accent-color: rgba(18,24,38,0.55);
+    }
+
+    .stage-vector-mini input[type="range"][disabled] {
+      opacity: 0.75;
+      cursor: default;
+    }
+
+    .stage-vector-label {
+      font-variant-numeric: tabular-nums;
+      font-size: 11px;
+      color: rgba(18,24,38,0.86);
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.08);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .text-area {
+      width: 100%;
+      text-align: center;
+      padding: 18px 14px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The text + its "shadow copy" live in the same container */
+    .text-stack {
+      position: relative;
+      display: inline-block;
+      transform: translateZ(0);
+    }
+
+    .main-text {
+      position: relative;
+      z-index: 2;
+      color: var(--text);
+      font-size: var(--size);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+      white-space: pre-wrap;
+      line-height: 1.05;
+
+      /* Direct, text-based shadow + bloom using text-shadow layers */
+      text-shadow:
+        /* core shadow (toggleable) */
+        var(--dx) var(--dy) 0 hsla(var(--shadow) / calc(var(--shadowAlpha) * 0.45 * var(--blurOn))),
+        /* bloom aligned with shadow direction (toggleable) */
+        var(--dx) var(--dy) calc(var(--bloom) * var(--blurOn)) hsla(var(--shadow) / calc(var(--shadowAlpha) * 0.55 * var(--blurOn))),
+        /* ambient glow (centered, toggleable) */
+        0 0 calc(var(--bloom) * 0.9 * var(--blurOn)) hsla(var(--shadow) / calc(var(--shadowAlpha) * 0.35 * var(--blurOn))),
+        0 0 calc(var(--bloom) * 1.6 * var(--blurOn)) hsla(var(--shadow) / calc(var(--shadowAlpha) * 0.22 * var(--blurOn)));
+    }
+
+    .panel {
+      display: none; /* control view removed (kept in DOM for wiring) */
+      border-radius: 22px;
+      border-radius: 22px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.78);
+      box-shadow: 0 10px 30px rgba(18,24,38,0.10);
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .panel h1 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.72);
+      margin-bottom: 10px;
+    }
+
+    .row label {
+      font-size: 12px;
+      color: var(--muted);
+      display: grid;
+      gap: 6px;
+    }
+
+    .dial {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+    }
+
+    .dial svg {
+      width: 64px;
+      height: 64px;
+      display: block;
+    }
+
+    .dial .ring {
+      fill: none;
+      stroke: rgba(0,0,0,0.22);
+      stroke-width: 1.4;
+    }
+
+    .dial .grid {
+      fill: none;
+      stroke: rgba(0,0,0,0.12);
+      stroke-width: 1;
+    }
+
+    .dial .needle {
+      stroke: rgba(0,0,0,0.70);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+
+    .dial .dot {
+      fill: rgba(0,0,0,0.70);
+    }
+
+    .value {
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+      color: var(--text);
+      opacity: 0.9;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.92);
+      color: var(--text);
+      outline: none;
+      font: inherit;
+      resize: vertical;
+    }
+
+    textarea { min-height: 84px; }
+
+    .btnbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.85);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    button:hover { border-color: rgba(0,0,0,0.22); }
+    button:active { transform: translateY(1px); }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      color: rgba(18,24,38,0.85);
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.10);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Print-friendly */
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --panel-border: rgba(0,0,0,0.20);
+        --accent: #000000;
+      }
+
+      body {
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .wrap {
+        width: 100%;
+        margin: 0;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      /* Hide controls entirely when printing */
+      .panel { display: none !important; }
+
+      .stage {
+        box-shadow: none !important;
+        border: 1px solid rgba(0,0,0,0.20);
+        min-height: 342px; /* was 360px */
+        padding: 23px;     /* was 24px */
+      }
+
+      .stage::before { opacity: 0.35; }
+    }
+
+    /* Motion safety */
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+    }
+
+    /* Focus (modal) view */
+    .focus-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(18,24,38,0.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .focus-overlay.open { display: flex; }
+
+    .focus-card {
+      position: relative;
+      width: min(1100px, calc(100vw - 48px));
+      height: min(770px, calc(100vh - 48px));
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      align-items: stretch;
+      justify-items: stretch;
+      padding: 18px;
+      border-radius: 22px;
+      border: 2px solid var(--accent);
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 24px 80px rgba(18,24,38,0.22);
+    }
+
+    .focus-controls {
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.88);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    /* Focus left panel: scale the stage-vector UI to fill the frame */
+    .focus-controls .stage-vector {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      max-width: 100%;
+      padding: 14px;
+      gap: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: none;
+      pointer-events: auto;
+      user-select: none;
+    }
+
+    .focus-controls .stage-vector .dial {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+
+    .focus-controls .stage-vector .dial svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .focus-controls .stage-vector-mini {
+      width: 100%;
+      gap: 8px;
+    }
+
+    .focus-controls .stage-vector-mini-title {
+      font-size: 13px;
+    }
+
+    .focus-controls .stage-vector-mini input[type="range"] {
+      height: 18px;
+    }
+
+    .focus-controls .stage-vector-label {
+      font-size: 13px;
+      padding: 6px 10px;
+    }
+
+    .focus-view {
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.78);
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .focus-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.92);
+      color: rgba(18,24,38,0.9);
+      font-weight: 800;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .focus-close:hover { border-color: rgba(0,0,0,0.22); }
+
+    /* When a stage is focused, let it fill the right pane */
+    .stage.is-focused {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      box-shadow: 0 18px 60px rgba(18,24,38,0.20);
+      padding: 56px;
+      overflow: hidden;
+    }
+
+    /* In focused view, move vector UI into left column */
+    .stage.is-focused .stage-vector { display: none; }
+
+    /* In focus, remove left reserve so the content can truly center */
+    .stage.is-focused {
+      padding: 56px;
+    }
+
+    .stage.is-focused .stage-vector {
+      /* still visible, but keep it inside */
+      top: 16px;
+      left: 16px;
+    }
+
+    /* Bottom action bar */
+    .footerbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9000;
+      padding: 12px 16px;
+      background: rgba(246,247,251,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,0.10);
+    }
+
+    .footerbar-inner {
+      width: min(1800px, 98vw);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .footerbar-inner > button {
+      width: 100%;
+    }
+
+    /* Give content room above fixed footer */
+    body { padding-bottom: 76px; }
+
+    @media print {
+      .footerbar { display: none !important; }
+      body { padding-bottom: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="stage-board" aria-label="Preview stage">
+      <div class="stage-row two" aria-label="Top row (2 previews)">
+        <div class="stage selected" data-index="0"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">both, withou</div></div></div></div></div>
+        <div class="stage" data-index="1"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">both, with</div></div></div></div></div>
+      </div>
+
+      <div class="stage-row four" aria-label="Middle row (4 previews)">
+        <div class="stage" data-index="2"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">left</div></div></div></div></div>
+        <div class="stage" data-index="3"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">right</div></div></div></div></div>
+        <div class="stage" data-index="4"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">left</div></div></div></div></div>
+        <div class="stage" data-index="5"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">right</div></div></div></div></div>
+      </div>
+
+      <div class="stage-row four" aria-label="Bottom row (4 previews)">
+        <div class="stage" data-index="6"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
+        <div class="stage" data-index="7"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
+        <div class="stage" data-index="8"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
+        <div class="stage" data-index="9"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">○</div></div></div></div></div>
+      </div>
+
+      <div class="stage-row four" aria-label="Fourth row (4 previews)">
+        <div class="stage" data-index="10"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
+        <div class="stage" data-index="11"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
+        <div class="stage" data-index="12"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
+        <div class="stage" data-index="13"><div class="content"><div class="text-area"><div class="text-stack"><div class="main-text">────</div></div></div></div></div>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Controls">
+      <h1>Controls</h1>
+      <p>Bloom is generated directly from the text via <span class="kbd">text-shadow</span> (more direct). Offset is computed from direction + distance.</p>
+
+      <div class="row">
+        <label>
+          Text
+          <textarea id="textInput" spellcheck="false">BLOOM</textarea>
+        </label>
+        <span class="value" id="textLen">5</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Size
+          <input id="size" type="range" min="16" max="140" value="64" />
+        </label>
+        <span class="value" id="sizeVal">64px</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Direction
+          <input id="dir" type="range" min="0" max="360" value="45" />
+        </label>
+        <span class="value" id="dirVal">45°</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Distance
+          <input id="dist" type="range" min="0" max="80" value="18" />
+        </label>
+        <span class="value" id="distVal">18px</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Vector
+          <div class="dial" aria-label="Direction and distance indicator">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Direction and distance dial">
+              <circle class="ring" cx="32" cy="32" r="26" />
+              <circle class="grid" cx="32" cy="32" r="18" />
+              <path class="grid" d="M32 6 V58 M6 32 H58 M13 13 L51 51 M51 13 L13 51" />
+              <line id="vecNeedle" class="needle" x1="32" y1="32" x2="32" y2="14" />
+              <circle id="vecDot" class="dot" cx="32" cy="14" r="2.6" />
+              <circle class="dot" cx="32" cy="32" r="2.2" opacity="0.35" />
+            </svg>
+          </div>
+        </label>
+        <span class="value" id="vecVal">45° · 18px</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Bloom (blur)
+          <input id="bloom" type="range" min="0" max="70" value="28" />
+        </label>
+        <span class="value" id="bloomVal">28px</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Shadow opacity
+          <input id="op" type="range" min="0" max="100" value="55" />
+        </label>
+        <span class="value" id="opVal">0.55</span>
+      </div>
+
+      <div class="row">
+        <label>
+          Shadows
+          <button id="toggleBlur" type="button" style="width:100%">Shadows: on</button>
+        </label>
+        <span class="value">all</span>
+      </div>
+
+      <!-- actions moved to bottom bar -->
+
+      <div class="hint">
+        Tip: Use <span class="kbd">Shift</span> + mouse wheel over sliders for finer control (supported in some browsers).
+      </div>
+    </aside>
+  </div>
+
+  <div class="footerbar" aria-label="Actions">
+    <div class="footerbar-inner">
+      <button id="print" type="button">Print view</button>
+      <button id="reset" type="button">Reset</button>
+      <button id="center" type="button">Direction: down</button>
+      <button id="save" type="button">Save…</button>
+      <button id="load" type="button">Load…</button>
+      <input id="loadFile" type="file" accept="application/json" hidden />
+    </div>
+  </div>
+
+  <!-- Focus overlay (center selected stage) -->
+  <div id="focusOverlay" class="focus-overlay" aria-hidden="true">
+    <div id="focusCard" class="focus-card" role="dialog" aria-modal="true" aria-label="Focused preview">
+      <button id="focusClose" class="focus-close" type="button" aria-label="Close">×</button>
+      <div id="focusControls" class="focus-controls" aria-label="Focused controls"></div>
+      <div id="focusView" class="focus-view" aria-label="Focused preview area"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    let activeStage = document.querySelector('.stage.selected');
+
+    const DEFAULTS = {
+      text: 'BLOOM',
+      size: 64,
+      dir: 45,
+      dist: 18,
+      bloom: 28,
+      op: 55,
+      blurOn: 1
+    };
+    
+    const textInput = $("textInput");
+    const size = $("size");
+    const dir = $("dir");
+    const dist = $("dist");
+    const bloom = $("bloom");
+    const op = $("op");
+
+    const sizeVal = $("sizeVal");
+    const dirVal = $("dirVal");
+    const distVal = $("distVal");
+    const vecVal = $("vecVal");
+    const vecNeedle = $("vecNeedle");
+    const vecDot = $("vecDot");
+    const bloomVal = $("bloomVal");
+    const opVal = $("opVal");
+    const textLen = $("textLen");
+
+    const toggleBlurBtn = $("toggleBlur");
+
+    // Focus overlay
+    const focusOverlay = $("focusOverlay");
+    const focusCard = $("focusCard");
+    const focusClose = $("focusClose");
+    const focusControls = $("focusControls");
+    const focusView = $("focusView");
+
+    let focusPlaceholder = null;
+    let focusOriginalParent = null;
+    let focusOriginalNext = null;
+    let focusVectorEl = null;
+
+    let isBooting = true;
+
+    const root = document.documentElement;
+
+    function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+
+    function getStageVector(stage) {
+      // In focus mode, the vector UI lives in the focusControls column
+      if (stage?.classList?.contains('is-focused')) {
+        return focusControls?.querySelector?.('.stage-vector') ?? stage.querySelector('.stage-vector');
+      }
+      return stage?.querySelector?.('.stage-vector');
+    }
+
+    function openFocus(stage) {
+      if (!focusOverlay || !focusCard || !stage || !focusControls || !focusView) return;
+      // Close any existing focus first
+      if (focusOverlay.classList.contains('open')) closeFocus();
+
+      focusOriginalParent = stage.parentNode;
+      focusOriginalNext = stage.nextSibling;
+      focusPlaceholder = document.createComment('stage-placeholder');
+      focusOriginalParent.insertBefore(focusPlaceholder, focusOriginalNext);
+
+      stage.classList.add('is-focused');
+
+      // move stage into the right pane
+      focusView.appendChild(stage);
+
+      // move this stage's vector UI into the left pane
+      ensureStageVector(stage);
+      focusVectorEl = stage.querySelector('.stage-vector');
+      if (focusVectorEl) focusControls.appendChild(focusVectorEl);
+
+      focusOverlay.classList.add('open');
+      focusOverlay.setAttribute('aria-hidden', 'false');
+
+      // keep controls synced + enable overlay editing
+      ensureStageVector(stage);
+      setStageOverlayEditable(stage, true);
+      updateStageVector(stage);
+    }
+
+    function closeFocus() {
+      if (!focusOverlay || !focusCard || !focusControls || !focusView) return;
+      if (!focusOverlay.classList.contains('open')) return;
+
+      const focusedStage = focusView.querySelector('.stage');
+      if (focusedStage) {
+        // move vector UI back into the stage
+        const vec = focusControls.querySelector('.stage-vector');
+        if (vec) focusedStage.appendChild(vec);
+        focusVectorEl = null;
+
+        // disable overlay editing again
+        setStageOverlayEditable(focusedStage, false);
+
+        if (focusPlaceholder && focusPlaceholder.parentNode) {
+          focusedStage.classList.remove('is-focused');
+          focusPlaceholder.parentNode.insertBefore(focusedStage, focusPlaceholder);
+          focusPlaceholder.remove();
+        }
+      }
+
+      focusPlaceholder = null;
+      focusOriginalParent = null;
+      focusOriginalNext = null;
+
+      focusOverlay.classList.remove('open');
+      focusOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function setCSSVar(name, value) {
+      // apply to all stages in the same row as the active stage
+      const row = activeStage.closest('.stage-row');
+      const stages = row ? row.querySelectorAll('.stage') : [activeStage];
+      stages.forEach(stage => stage.style.setProperty(name, value));
+    }
+
+    function getBlurOnFromStage(stage) {
+      const v = Number(stage?.dataset?.blurOn ?? stage?.style?.getPropertyValue('--blurOn') ?? DEFAULTS.blurOn);
+      return v === 0 ? 0 : 1;
+    }
+
+    function updateBlurButton() {
+      if (!toggleBlurBtn) return;
+      const anyOn = Array.from(document.querySelectorAll('.stage'))
+        .some(s => Number(s.dataset.blurOn ?? DEFAULTS.blurOn) !== 0);
+      toggleBlurBtn.textContent = anyOn ? 'Shadows: on' : 'Shadows: off';
+    }
+
+    function setBlurEnabled(enabled) {
+      const on = enabled ? 1 : 0;
+      document.querySelectorAll('.stage').forEach(stage => {
+        stage.dataset.blurOn = String(on);
+        stage.style.setProperty('--blurOn', String(on));
+      });
+      updateBlurButton(activeStage);
+    }
+
+    function ensureStageVector(stage) {
+      if (!stage || stage.querySelector('.stage-vector')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'stage-vector';
+      wrap.innerHTML = `
+        <div class="dial" aria-hidden="true">
+          <svg class="stage-dial" viewBox="0 0 64 64" focusable="false" aria-hidden="true">
+            <circle class="ring" cx="32" cy="32" r="26" />
+            <circle class="grid" cx="32" cy="32" r="18" />
+            <path class="grid" d="M32 6 V58 M6 32 H58 M13 13 L51 51 M51 13 L13 51" />
+            <line class="needle stage-needle" x1="32" y1="32" x2="32" y2="14" />
+            <circle class="dot stage-dot" cx="32" cy="14" r="2.6" />
+            <circle class="dot" cx="32" cy="32" r="2.2" opacity="0.35" />
+          </svg>
+        </div>
+        <div class="stage-vector-label">45° · 18px</div>
+
+        <div class="stage-vector-mini">
+          <div class="stage-vector-mini-title">Direction</div>
+          <input class="stage-dir" type="range" min="0" max="360" value="45" aria-label="Direction" />
+        </div>
+
+        <div class="stage-vector-mini">
+          <div class="stage-vector-mini-title">Distance</div>
+          <input class="stage-dist" type="range" min="0" max="80" value="18" aria-label="Distance" />
+        </div>
+
+        <div class="stage-vector-mini">
+          <div class="stage-vector-mini-title">Size</div>
+          <input class="stage-size" type="range" min="16" max="140" value="64" aria-label="Size" />
+        </div>
+
+        <div class="stage-vector-mini">
+          <div class="stage-vector-mini-title">Bloom</div>
+          <input class="stage-bloom" type="range" min="0" max="70" value="28" aria-label="Bloom" />
+        </div>
+
+        <div class="stage-vector-mini">
+          <div class="stage-vector-mini-title">Opacity</div>
+          <input class="stage-op" type="range" min="0" max="100" value="55" aria-label="Opacity" />
+        </div>
+      `;
+      stage.appendChild(wrap);
+
+      // Default: non-editable until focused
+      setStageOverlayEditable(stage, false);
+    }
+
+    function setStageOverlayEditable(stage, editable) {
+      const wrap = getStageVector(stage);
+      if (!wrap) return;
+
+      const dirEl = wrap.querySelector('.stage-dir');
+      const distEl = wrap.querySelector('.stage-dist');
+      const sizeEl = wrap.querySelector('.stage-size');
+      const bloomEl = wrap.querySelector('.stage-bloom');
+      const opEl = wrap.querySelector('.stage-op');
+      const dial = wrap.querySelector('.stage-dial');
+
+      // Sliders editable only in focused view
+      if (dirEl) dirEl.disabled = !editable;
+      if (distEl) distEl.disabled = !editable;
+      if (sizeEl) sizeEl.disabled = !editable;
+      if (bloomEl) bloomEl.disabled = !editable;
+      if (opEl) opEl.disabled = !editable;
+
+      // Attach listeners once
+      if (editable && !wrap.dataset.bound) {
+        wrap.dataset.bound = '1';
+
+        if (dirEl) {
+          dirEl.addEventListener('input', () => {
+            dir.value = String(dirEl.value);
+            updateOffset();
+          });
+        }
+
+        if (distEl) {
+          distEl.addEventListener('input', () => {
+            dist.value = String(distEl.value);
+            updateOffset();
+          });
+        }
+
+        if (sizeEl) {
+          sizeEl.addEventListener('input', () => {
+            size.value = String(sizeEl.value);
+            render();
+          });
+        }
+
+        if (bloomEl) {
+          bloomEl.addEventListener('input', () => {
+            bloom.value = String(bloomEl.value);
+            render();
+          });
+        }
+
+        if (opEl) {
+          opEl.addEventListener('input', () => {
+            op.value = String(opEl.value);
+            render();
+          });
+        }
+
+        if (dial) {
+          const toLocal = (ev) => {
+            const rect = dial.getBoundingClientRect();
+            const x = ((ev.clientX - rect.left) / rect.width) * 64;
+            const y = ((ev.clientY - rect.top) / rect.height) * 64;
+            return { x, y };
+          };
+
+          const applyFromPoint = (pt) => {
+            // angle in degrees where 0°=up, 90°=right, 180°=down, 270°=left
+            const dx = pt.x - 32;
+            const dy = pt.y - 32;
+            const ang = Math.atan2(dy, dx);
+            let deg = (ang * 180 / Math.PI) + 90;
+            deg = (deg % 360 + 360) % 360;
+
+            // distance mapped to slider max
+            const r = Math.sqrt(dx*dx + dy*dy);
+            const rMin = 6;
+            const rMax = 24;
+            const t = clamp((r - rMin) / (rMax - rMin), 0, 1);
+            const ds = Math.round(t * Number(dist.max || 80));
+
+            dir.value = String(Math.round(deg));
+            dist.value = String(ds);
+            updateOffset();
+          };
+
+          dial.addEventListener('pointerdown', (e) => {
+            if (!stage.classList.contains('is-focused')) return;
+            dial.setPointerCapture(e.pointerId);
+            applyFromPoint(toLocal(e));
+          });
+
+          dial.addEventListener('pointermove', (e) => {
+            if (!stage.classList.contains('is-focused')) return;
+            if (e.buttons === 0) return;
+            applyFromPoint(toLocal(e));
+          });
+        }
+      }
+
+      // Keep the overlay's slider values in sync with the stage state
+      updateStageVector(stage);
+    }
+
+    function updateStageVector(stage) {
+      const wrap = getStageVector(stage);
+      if (!wrap) return;
+      const needle = wrap.querySelector('.stage-needle');
+      const dot = wrap.querySelector('.stage-dot');
+      const label = wrap.querySelector('.stage-vector-label');
+      if (!needle || !dot || !label) return;
+
+      const di = Number(stage.dataset.dir ?? DEFAULTS.dir);
+      const ds = Number(stage.dataset.dist ?? DEFAULTS.dist);
+      const maxDist = Number(dist.max || 80);
+      const rMin = 6;
+      const rMax = 24;
+      const r = rMin + (rMax - rMin) * (maxDist === 0 ? 0 : clamp(ds / maxDist, 0, 1));
+      const angle = (di - 90) * (Math.PI / 180);
+      const x2 = 32 + Math.cos(angle) * r;
+      const y2 = 32 + Math.sin(angle) * r;
+
+      needle.setAttribute('x2', x2.toFixed(2));
+      needle.setAttribute('y2', y2.toFixed(2));
+      dot.setAttribute('cx', x2.toFixed(2));
+      dot.setAttribute('cy', y2.toFixed(2));
+      label.textContent = `${di}° · ${ds}px`;
+
+      const dirEl = wrap.querySelector('.stage-dir');
+      if (dirEl) dirEl.value = String(Number(stage.dataset.dir ?? DEFAULTS.dir));
+
+      const distEl = wrap.querySelector('.stage-dist');
+      if (distEl) distEl.value = String(Number(stage.dataset.dist ?? DEFAULTS.dist));
+
+      const sizeEl = wrap.querySelector('.stage-size');
+      if (sizeEl) sizeEl.value = String(Number(stage.dataset.size ?? DEFAULTS.size));
+
+      const bloomEl = wrap.querySelector('.stage-bloom');
+      if (bloomEl) bloomEl.value = String(Number(stage.dataset.bloom ?? DEFAULTS.bloom));
+
+      const opEl = wrap.querySelector('.stage-op');
+      if (opEl) opEl.value = String(Number(stage.dataset.op ?? DEFAULTS.op));
+    }
+
+    function updateVectorDial() {
+      if (!vecNeedle || !vecDot || !vecVal) return;
+      const di = Number(dir.value);
+      const ds = Number(dist.value);
+      const maxDist = Number(dist.max || 80);
+      const rMin = 6;
+      const rMax = 24;
+      const r = rMin + (rMax - rMin) * (maxDist === 0 ? 0 : clamp(ds / maxDist, 0, 1));
+      const angle = (di - 90) * (Math.PI / 180);
+      const x2 = 32 + Math.cos(angle) * r;
+      const y2 = 32 + Math.sin(angle) * r;
+
+      vecNeedle.setAttribute('x2', x2.toFixed(2));
+      vecNeedle.setAttribute('y2', y2.toFixed(2));
+      vecDot.setAttribute('cx', x2.toFixed(2));
+      vecDot.setAttribute('cy', y2.toFixed(2));
+      vecVal.textContent = `${di}° · ${ds}px`;
+    }
+
+    function updateOffset() {
+      const angle = (Number(dir.value) - 90) * (Math.PI / 180);
+      const d = Number(dist.value);
+      const dx = Math.cos(angle) * d;
+      const dy = Math.sin(angle) * d;
+      activeStage.style.setProperty('--dx', dx.toFixed(2) + 'px');
+      activeStage.style.setProperty('--dy', dy.toFixed(2) + 'px');
+      // persist
+      activeStage.dataset.dir = String(dir.value);
+      activeStage.dataset.dist = String(dist.value);
+
+      ensureStageVector(activeStage);
+      updateStageVector(activeStage);
+
+      dirVal.textContent = dir.value + '°';
+      distVal.textContent = dist.value + 'px';
+      updateVectorDial();
+    }
+
+    function render() {
+      const t = textInput.value || " ";
+      activeStage.querySelector('.main-text').textContent = t;
+      activeStage.dataset.text = t;
+      textLen.textContent = String(t.length);
+
+      const s = clamp(Number(size.value), 16, 140);
+      const b = clamp(Number(bloom.value), 0, 70);
+      const o = clamp(Number(op.value), 0, 100);
+
+      setCSSVar('--size', s + 'px');
+      activeStage.style.setProperty('--bloom', b + 'px');
+      activeStage.style.setProperty('--shadowAlpha', (o / 100).toFixed(2));
+
+      const row = activeStage.closest('.stage-row');
+      const stages = row ? row.querySelectorAll('.stage') : [activeStage];
+      stages.forEach(stage => stage.dataset.size = String(s));
+      activeStage.dataset.bloom = String(b);
+      activeStage.dataset.op = String(o);
+
+      sizeVal.textContent = s + 'px';
+      bloomVal.textContent = b + 'px';
+      opVal.textContent = (o / 100).toFixed(2);
+
+      updateOffset();
+      updateVectorDial();
+    }
+
+    function applyStageStateToControls(stage) {
+      const state = {
+        text: stage.dataset.text ?? stage.querySelector('.main-text')?.textContent ?? DEFAULTS.text,
+        size: Number(stage.dataset.size ?? DEFAULTS.size),
+        dir: Number(stage.dataset.dir ?? DEFAULTS.dir),
+        dist: Number(stage.dataset.dist ?? DEFAULTS.dist),
+        bloom: Number(stage.dataset.bloom ?? DEFAULTS.bloom),
+        op: Number(stage.dataset.op ?? DEFAULTS.op),
+        blurOn: Number(stage.dataset.blurOn ?? DEFAULTS.blurOn),
+      };
+
+      textInput.value = state.text;
+      size.value = String(state.size);
+      dir.value = String(state.dir);
+      dist.value = String(state.dist);
+      bloom.value = String(state.bloom);
+      op.value = String(state.op);
+
+      // update readouts without writing back to stage
+      textLen.textContent = String(state.text.length);
+      sizeVal.textContent = state.size + 'px';
+      dirVal.textContent = state.dir + '°';
+      distVal.textContent = state.dist + 'px';
+      bloomVal.textContent = state.bloom + 'px';
+      opVal.textContent = (state.op / 100).toFixed(2);
+
+      updateVectorDial();
+
+      updateBlurButton(stage);
+    }
+
+    function initStage(stage) {
+      ensureStageVector(stage);
+      const existingText = stage.querySelector('.main-text')?.textContent;
+      stage.dataset.text = stage.dataset.text ?? (existingText && existingText.trim() !== '' ? existingText : DEFAULTS.text);
+      stage.dataset.size = stage.dataset.size ?? String(DEFAULTS.size);
+      stage.dataset.dir = stage.dataset.dir ?? String(DEFAULTS.dir);
+      stage.dataset.dist = stage.dataset.dist ?? String(DEFAULTS.dist);
+      stage.dataset.bloom = stage.dataset.bloom ?? String(DEFAULTS.bloom);
+      stage.dataset.op = stage.dataset.op ?? String(DEFAULTS.op);
+      stage.dataset.blurOn = stage.dataset.blurOn ?? String(DEFAULTS.blurOn);
+
+      stage.querySelector('.main-text').textContent = stage.dataset.text;
+      stage.style.setProperty('--size', stage.dataset.size + 'px');
+      stage.style.setProperty('--bloom', stage.dataset.bloom + 'px');
+      stage.style.setProperty('--shadowAlpha', (Number(stage.dataset.op) / 100).toFixed(2));
+      stage.style.setProperty('--blurOn', String(Number(stage.dataset.blurOn) === 0 ? 0 : 1));
+
+      const angle = (Number(stage.dataset.dir) - 90) * (Math.PI / 180);
+      const d = Number(stage.dataset.dist);
+      stage.style.setProperty('--dx', (Math.cos(angle) * d).toFixed(2) + 'px');
+      stage.style.setProperty('--dy', (Math.sin(angle) * d).toFixed(2) + 'px');
+      updateStageVector(stage);
+    }
+
+    function readStateFromStage(stage) {
+      return {
+        text: stage.dataset.text ?? stage.querySelector('.main-text')?.textContent ?? DEFAULTS.text,
+        size: Number(stage.dataset.size ?? DEFAULTS.size),
+        dir: Number(stage.dataset.dir ?? DEFAULTS.dir),
+        dist: Number(stage.dataset.dist ?? DEFAULTS.dist),
+        bloom: Number(stage.dataset.bloom ?? DEFAULTS.bloom),
+        op: Number(stage.dataset.op ?? DEFAULTS.op),
+        blurOn: Number(stage.dataset.blurOn ?? DEFAULTS.blurOn),
+      };
+    }
+
+    function applyStateToStage(stage, state) {
+      const t = String(state.text ?? DEFAULTS.text);
+      const s = clamp(Number(state.size ?? DEFAULTS.size), 16, 140);
+      const b = clamp(Number(state.bloom ?? DEFAULTS.bloom), 0, 70);
+      const o = clamp(Number(state.op ?? DEFAULTS.op), 0, 100);
+      const di = clamp(Number(state.dir ?? DEFAULTS.dir), 0, 360);
+      const ds = clamp(Number(state.dist ?? DEFAULTS.dist), 0, 80);
+
+      stage.dataset.text = t;
+      const row = stage.closest('.stage-row');
+      const stages = row ? row.querySelectorAll('.stage') : [stage];
+      stages.forEach(st => st.dataset.size = String(s));
+      stage.dataset.dir = String(di);
+      stage.dataset.dist = String(ds);
+      stage.dataset.bloom = String(b);
+      stage.dataset.op = String(o);
+      stage.dataset.blurOn = String(state.blurOn ?? stage.dataset.blurOn ?? DEFAULTS.blurOn);
+
+      stage.querySelector('.main-text').textContent = t;
+      stage.style.setProperty('--size', s + 'px');
+      stage.style.setProperty('--bloom', b + 'px');
+      stage.style.setProperty('--shadowAlpha', (o / 100).toFixed(2));
+      stage.style.setProperty('--blurOn', String(Number(stage.dataset.blurOn) === 0 ? 0 : 1));
+
+      const angle = (di - 90) * (Math.PI / 180);
+      const dx = Math.cos(angle) * ds;
+      const dy = Math.sin(angle) * ds;
+      stage.style.setProperty('--dx', dx.toFixed(2) + 'px');
+      stage.style.setProperty('--dy', dy.toFixed(2) + 'px');
+      ensureStageVector(stage);
+      updateStageVector(stage);
+    }
+
+    const inputs = [textInput, size, dir, dist, bloom, op];
+
+    // Print
+    $("print").addEventListener('click', () => {
+      window.print();
+    });
+
+    // Save / Load (disk)
+    async function saveToDisk(filename, data) {
+      const json = JSON.stringify(data, null, 2);
+
+      // Preferred: File System Access API
+      try {
+        if ('showSaveFilePicker' in window) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(new Blob([json], { type: 'application/json' }));
+          await writable.close();
+          return;
+        }
+      } catch (_) {
+        // user may cancel; fall back
+      }
+
+      // Fallback: download
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    $("save").addEventListener('click', async () => {
+      const stages = Array.from(document.querySelectorAll('.stage')).map(readStateFromStage);
+      const selectedIndex = Array.from(document.querySelectorAll('.stage')).findIndex(s => s.classList.contains('selected'));
+      await saveToDisk('bloom-settings.json', {
+        version: 1,
+        selectedIndex: selectedIndex < 0 ? 0 : selectedIndex,
+        stages
+      });
+    });
+
+    const loadFile = $("loadFile");
+    $("load").addEventListener('click', () => loadFile.click());
+
+    loadFile.addEventListener('change', async () => {
+      const file = loadFile.files?.[0];
+      loadFile.value = '';
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const stagesData = Array.isArray(data?.stages) ? data.stages : [];
+        const stagesEls = Array.from(document.querySelectorAll('.stage'));
+
+        stagesEls.forEach((stage, i) => {
+          applyStateToStage(stage, stagesData[i] ?? DEFAULTS);
+        });
+
+        const idx = clamp(Number(data?.selectedIndex ?? 0), 0, stagesEls.length - 1);
+        stagesEls.forEach(s => s.classList.remove('selected'));
+        stagesEls[idx].classList.add('selected');
+        activeStage = stagesEls[idx];
+        applyStageStateToControls(activeStage);
+      } catch (e) {
+        alert('Could not load settings: ' + (e?.message ?? String(e)));
+      }
+    });
+
+    inputs.forEach((el) => el.addEventListener('input', render));
+
+    // Blur toggle
+    if (toggleBlurBtn) {
+      toggleBlurBtn.addEventListener('click', () => {
+        setBlurEnabled(getBlurOnFromStage(activeStage) === 0);
+      });
+    }
+
+    $("reset").addEventListener('click', () => {
+      // Reset ONLY the selected stage
+      textInput.value = DEFAULTS.text;
+      size.value = DEFAULTS.size;
+      dir.value = DEFAULTS.dir;
+      dist.value = DEFAULTS.dist;
+      bloom.value = DEFAULTS.bloom;
+      op.value = DEFAULTS.op;
+      render();
+      isBooting = false;
+      updateBlurButton(activeStage);
+    });
+
+    $("center").addEventListener('click', () => {
+      // Apply ONLY to selected stage
+      dir.value = 180; // down
+      render();
+    });
+
+    // Mouse wheel on selected stage: toggle shadows for that stage only
+    document.addEventListener('wheel', (e) => {
+      if (!activeStage) return;
+      // avoid interfering with sliders / scrolling panel
+      if (e.target.closest('.panel')) return;
+      e.preventDefault();
+      const current = Number(activeStage.dataset.blurOn ?? DEFAULTS.blurOn) !== 0;
+      activeStage.dataset.blurOn = current ? '0' : '1';
+      activeStage.style.setProperty('--blurOn', current ? '0' : '1');
+      updateBlurButton();
+    }, { passive: false });
+
+    // Focus overlay interactions
+    if (focusOverlay && focusCard) {
+      // Click outside the card closes
+      focusOverlay.addEventListener('click', (e) => {
+        if (e.target === focusOverlay) closeFocus();
+      });
+      // Prevent inside clicks from closing
+      focusCard.addEventListener('click', (e) => e.stopPropagation());
+      if (focusControls) focusControls.addEventListener('click', (e) => e.stopPropagation());
+      if (focusView) focusView.addEventListener('click', (e) => e.stopPropagation());
+    }
+    if (focusClose) focusClose.addEventListener('click', closeFocus);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFocus();
+    });
+
+    // stage selection
+    document.querySelectorAll('.stage').forEach(stage => {
+      stage.addEventListener('click', () => {
+        // If already focused, don't re-open / re-parent on inner clicks
+        if (stage.classList.contains('is-focused')) return;
+        document.querySelectorAll('.stage').forEach(s => s.classList.remove('selected'));
+        stage.classList.add('selected');
+        activeStage = stage;
+
+        // IMPORTANT: switching selection should NOT copy current controls into the new stage.
+        // Instead, load that stage's saved state into the controls.
+        applyStageStateToControls(stage);
+        // ensure button reflects the stage and blur var is present
+        if (stage.dataset.blurOn == null) stage.dataset.blurOn = String(DEFAULTS.blurOn);
+        stage.style.setProperty('--blurOn', String(Number(stage.dataset.blurOn) === 0 ? 0 : 1));
+
+        // Maximize the selected element
+        openFocus(stage);
+      });
+    });
+
+    // Initialize defaults for all stages
+    document.querySelectorAll('.stage').forEach(stage => initStage(stage));
+
+    // Ensure controls reflect the initially selected stage
+    activeStage = document.querySelector('.stage.selected') ?? document.querySelector('.stage');
+    if (activeStage) {
+      applyStageStateToControls(activeStage);
+      // And ensure the selected stage matches its own saved settings
+      render();
+    }
+  </script>
+</body>
+</html>
