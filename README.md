@@ -27,5 +27,10 @@ This project is for educational and self-check purposes only. It is **not** a me
 3. Source: `main` branch, `/root` folder
 4. Your site will be available at `https://<username>.github.io/<repo>/`
 
+## Acknowledgements
+This project was developed using an iterative, AI-assisted workflow (“vibe coding”) with the help of ChatGPT.  
+All final design decisions, testing, and responsibility for the code remain with the repository owner.
+
 ## License
 MIT License
+
