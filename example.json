@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "selectedIndex": 2,
+  "selectedIndex": 5,
   "stages": [
     {
       "text": "both, without",
       "size": 65,
       "dir": 167,
-      "dist": 3,
-      "bloom": 0,
+      "dist": 14,
+      "bloom": 12,
       "op": 53,
       "blurOn": 1
     },
@@ -15,25 +15,25 @@
       "text": "both, with",
       "size": 65,
       "dir": 8,
-      "dist": 8,
+      "dist": 15,
       "bloom": 28,
-      "op": 21,
+      "op": 29,
       "blurOn": 1
     },
     {
       "text": "left",
       "size": 64,
       "dir": 179,
-      "dist": 30,
-      "bloom": 20,
-      "op": 12,
+      "dist": 38,
+      "bloom": 41,
+      "op": 40,
       "blurOn": 1
     },
     {
       "text": "right",
       "size": 64,
       "dir": 176,
-      "dist": 5,
+      "dist": 17,
       "bloom": 15,
       "op": 29,
       "blurOn": 1
@@ -53,23 +53,23 @@
       "dir": 9,
       "dist": 12,
       "bloom": 7,
-      "op": 11,
+      "op": 19,
       "blurOn": 1
     },
     {
       "text": "○",
       "size": 64,
       "dir": 184,
-      "dist": 32,
-      "bloom": 1,
-      "op": 11,
+      "dist": 21,
+      "bloom": 35,
+      "op": 30,
       "blurOn": 1
     },
     {
       "text": "○",
       "size": 64,
-      "dir": 180,
-      "dist": 7,
+      "dir": 195,
+      "dist": 22,
       "bloom": 22,
       "op": 49,
       "blurOn": 1
@@ -86,7 +86,7 @@
     {
       "text": "○",
       "size": 64,
-      "dir": 319,
+      "dir": 324,
       "dist": 7,
       "bloom": 28,
       "op": 32,
@@ -95,19 +95,19 @@
     {
       "text": "────",
       "size": 65,
-      "dir": 176,
-      "dist": 11,
-      "bloom": 9,
-      "op": 7,
+      "dir": 191,
+      "dist": 31,
+      "bloom": 23,
+      "op": 36,
       "blurOn": 1
     },
     {
       "text": "────",
       "size": 65,
-      "dir": 167,
-      "dist": 8,
-      "bloom": 28,
-      "op": 22,
+      "dir": 187,
+      "dist": 15,
+      "bloom": 48,
+      "op": 45,
       "blurOn": 1
     },
     {
@@ -116,7 +116,7 @@
       "dir": 0,
       "dist": 10,
       "bloom": 27,
-      "op": 27,
+      "op": 41,
       "blurOn": 1
     },
     {
@@ -125,7 +125,7 @@
       "dir": 6,
       "dist": 8,
       "bloom": 63,
-      "op": 24,
+      "op": 43,
       "blurOn": 1
     }
   ]
